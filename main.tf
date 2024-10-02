@@ -1,68 +1,35 @@
-resource "aws_vpc" "Terraform-vpc" {
-    cidr_block = "10.0.0.0/16"
-
-    tags = {
-      Name = "Terraform-vpc"
-    }
-  
+provider "aws" {
+  region = "ca-central-1"
 }
 
-resource "aws_subnet" "Terraform-subnets" {
-    vpc_id = aws_vpc.Terraform-vpc.id
-    cidr_block = "10.0.0.0/24"
+# Use existing VPC and Subnet IDs where Jenkins is running
 
-    tags = {
-      Name = "Terrafrom-subnets"
-    }
-  
-}
-
-resource "aws_internet_gateway" "Terraform-internet_gateway" {
-    vpc_id = aws_vpc.Terraform-vpc.id
-
-    tags = {
-      Name = "Terrafrom-internetgateway"
-    }
-  
-}
-
-resource "aws_route_table" "public_rt" {
-    vpc_id = aws_vpc.Terraform-vpc.id
-    route {
-        cidr_block = "0.0.0.0/0"
-        gateway_id = aws_internet_gateway.Terraform-internet_gateway.id
-
-    }
-    tags = {
-      Name = "route_table"
-    }
-}
-resource "aws_route_table_association" "Terraform-route_table_association" {
-    subnet_id = aws_subnet.Terraform-subnets.id
-    route_table_id = aws_route_table.public_rt.id
-  
-}
 resource "aws_security_group" "sg_terraform" {
-    vpc_id = aws_vpc.Terraform-vpc.id
+    vpc_id = "vpc-077075c8b4c08e59d"  # Existing VPC ID
     
     ingress {
-        from_port = 22
-        to_port = 22
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
+        from_port   = 22
+        to_port     = 22
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]  # Allow SSH from anywhere (can be restricted)
     }
     ingress {
-        from_port = 80
-        to_port = 80
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
+        from_port   = 80
+        to_port     = 80
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]  # Allow HTTP
     }
-    
-    egress  {
-        from_port = 0
-        to_port = 0
-        protocol = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
+    ingress {
+        from_port   = 8081
+        to_port     = 8081
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]  # Allow HTTP
+    }
+    egress {
+        from_port   = 0
+        to_port     = 0
+        protocol    = "-1"
+        cidr_blocks = ["0.0.0.0/0"]  # Allow all outgoing traffic
     }
     
     tags = {
@@ -70,14 +37,15 @@ resource "aws_security_group" "sg_terraform" {
     }
 }
 
-
 resource "aws_instance" "app_server" {
-    ami = "ami-0208b77a23d891325"
-    instance_type = "t2.micro"
-    subnet_id = aws_subnet.Terraform-subnets.id
+    ami             = "ami-0eb9fdcf0d07bd5ef"  # Example AMI, adjust as needed
+    instance_type   = "t2.micro"
+    subnet_id       = "subnet-01c6f07c2dc404623"  # Existing Subnet ID
     security_groups = [aws_security_group.sg_terraform.id]
+    
+    user_data = file("install.sh")  # Reference the install.sh script to install your software
+
     tags = {
-      Name= "AppServer"
+      Name = "AppServer"
     }
-  
 }
