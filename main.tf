@@ -43,9 +43,17 @@ resource "aws_instance" "app_server" {
     subnet_id       = "subnet-01c6f07c2dc404623"  # Existing Subnet ID
     security_groups = [aws_security_group.sg_terraform.id]
     
+<<<<<<< HEAD
     user_data = file("install.sh")  # Reference the install.sh script to install your software
 
+=======
+    user_data = file("install.sh")
+>>>>>>> ca5f3b6410682e91dbd585a0f54e0373f2ee4e67
     tags = {
       Name = "AppServer"
     }
+<<<<<<< HEAD
+=======
+  
+>>>>>>> ca5f3b6410682e91dbd585a0f54e0373f2ee4e67
 }
