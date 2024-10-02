@@ -76,6 +76,8 @@ resource "aws_instance" "app_server" {
     instance_type = "t2.micro"
     subnet_id = aws_subnet.Terraform-subnets.id
     security_groups = [aws_security_group.sg_terraform.id]
+    
+    user_data = file("install.sh")
     tags = {
       Name= "AppServer"
     }
