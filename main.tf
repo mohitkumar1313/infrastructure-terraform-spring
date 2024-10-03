@@ -41,6 +41,7 @@ resource "aws_instance" "app_server" {
     ami             = "ami-0eb9fdcf0d07bd5ef"  # Example AMI, adjust as needed
     instance_type   = "t2.micro"
     subnet_id       = "subnet-01c6f07c2dc404623"  # Existing Subnet ID
+    key_name        = "scale-app"
     security_groups = [aws_security_group.sg_terraform.id]
     
     user_data = file("install.sh")  # Reference the install.sh script to install your software
